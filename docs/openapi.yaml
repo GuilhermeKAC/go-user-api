@@ -1,0 +1,185 @@
+openapi: 3.0.3
+info:
+  title: Go User API
+  description: API REST para gerenciamento de usuários.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /users:
+    post:
+      summary: Criar usuário
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+            example:
+              name: João Silva
+              email: joao@example.com
+              password: senha123
+      responses:
+        '200':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Erro interno do servidor
+          content:
+            text/plain:
+              schema:
+                type: string
+
+    get:
+      summary: Listar todos os usuários
+      operationId: getAllUsers
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Erro interno do servidor
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /users/{id}:
+    get:
+      summary: Buscar usuário por ID
+      operationId: getUser
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuário não encontrado
+        '500':
+          description: Erro interno do servidor
+          content:
+            text/plain:
+              schema:
+                type: string
+
+    put:
+      summary: Atualizar usuário
+      operationId: updateUser
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+            example:
+              name: João Atualizado
+              email: joao.novo@example.com
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Erro interno do servidor
+          content:
+            text/plain:
+              schema:
+                type: string
+
+    delete:
+      summary: Deletar usuário
+      operationId: deleteUser
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '204':
+          description: Usuário deletado com sucesso
+        '500':
+          description: Erro interno do servidor
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: UUID do usuário
+      schema:
+        type: string
+        format: uuid
+      example: 550e8400-e29b-41d4-a716-446655440000
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único do usuário
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: Nome do usuário
+          example: João Silva
+        email:
+          type: string
+          format: email
+          description: E-mail do usuário
+          example: joao@example.com
+
+    UserInput:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          description: Nome do usuário
+          example: João Silva
+        email:
+          type: string
+          format: email
+          description: E-mail do usuário
+          example: joao@example.com
+        password:
+          type: string
+          format: password
+          description: Senha do usuário (não retornada nas respostas)
+          example: senha123
