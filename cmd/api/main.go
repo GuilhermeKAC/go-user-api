@@ -1,15 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/GuilhermeKAC/go-user-api/internal/config"
+	"github.com/GuilhermeKAC/go-user-api/internal/handlers"
+	"github.com/GuilhermeKAC/go-user-api/internal/repository"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "API Go funcionando!")
-	})
+	// Conectar ao banco
+	db, err := config.ConnectDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
-	fmt.Println("Servidor rodando em http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	// Criar repository e handler
+	userRepo := repository.NewUserRepository(db)
+	userHandler := handlers.NewUserHandler(userRepo)
+
+	// Rotas
+	http.HandleFunc("POST /users", userHandler.CreateUser)
+	http.HandleFunc("GET /users", userHandler.GetAllUsers)
+	http.HandleFunc("GET /users/", userHandler.GetUser)
+	http.HandleFunc("PUT /users/", userHandler.UpdateUser)
+	http.HandleFunc("DELETE /users/", userHandler.DeleteUser)
+
+	log.Println("Servidor rodando em http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
